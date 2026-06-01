@@ -6,8 +6,6 @@ List Anggota Kelompok Tikum:
 3. Gabrielle Christin Gillberlyn Ginting (251401047)
 4. Moza Apriza Parinduri (251401020)
 
-Deskripsi Program: 
-
-Link Google Drive (berisi screenshot hasil program) :
+Link Google Drive (berisi screenshot hasil program) : https://drive.google.com/drive/folders/1SzISfsuAURDWwa3XaozNr7j66FRyRgKd?usp=sharing
 
 Link Video Presentasi Youtube: 
