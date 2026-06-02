@@ -7,11 +7,11 @@ List Anggota Kelompok Tikum:
 4. Salsabila Sujarwo (251401086)
 
 Pembagian Pengerjaan Project: 
-1.
+1. Project 1 dikerjakan oleh
 2. Project 2 dikerjakan oleh Jesslyn Inggrid (251401029)
-3. 
-4.
-5.
+3. Project 3 dikerjakan oleh
+4. Project 4 dikerjakan oleh
+5. Project 5 dikerjakan oleh
 
 Link Google Drive (berisi screenshot hasil program) : https://drive.google.com/drive/folders/1SzISfsuAURDWwa3XaozNr7j66FRyRgKd?usp=sharing
 
