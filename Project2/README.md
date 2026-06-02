@@ -1,6 +1,6 @@
 Project 2 dikerjakan oleh : Jesslyn Inggrid (251401029)
 
-Deskripsi Singkat tentang Project 2 : Mystery Word 
+Deskripsi Singkat tentang Project 2 : Mystery Word
 
 Mystery Word adalah permainan tebak kata sederhana yang dibuat menggunakan bahasa C++. 
 Dalam game ini, pemain harus menebak sebuah kata rahasia yang dipilih secara acak oleh sistem dengan cara memasukkan huruf satu per satu.
