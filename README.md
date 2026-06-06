@@ -11,7 +11,7 @@ Pembagian Pengerjaan Project:
 2. Project 2 dikerjakan oleh Jesslyn Inggrid (251401029)
 3. Project 3 dikerjakan oleh Salsabila Sujarwo (251401086)
 4. Project 4 dikerjakan oleh Gabrielle Christin (251401047)
-5. Project 5 dikerjakan oleh
+5. Project 5 dikerjakan oleh Semua Anggota Kelompok 
 
 Link Google Drive (berisi screenshot hasil program) : https://drive.google.com/drive/folders/1SzISfsuAURDWwa3XaozNr7j66FRyRgKd?usp=sharing
 
