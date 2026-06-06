@@ -4,13 +4,13 @@
 
 const int MAX_SIZE = 10;
 
-// simvol tampilan
+//simbolnya
 const char SYM_HIDDEN  = '.';
 const char SYM_FLAG    = 'F';
 const char SYM_BOMB    = '*';
 const char SYM_EXPLODE = 'X';
 
-//buat cetak int ke string (ganti std::to_string)
+// ganti int ke string (ganti std::to_string)
 std::string intToStr(int n) {
     if (n == 0) return "0";
     bool neg = (n < 0);
@@ -24,10 +24,10 @@ std::string intToStr(int n) {
     return s;
 }
 
-
+//class game
 class Game {
 private:
-    //state papan
+    //state papannya
     int  size;
     int  totalBombs;
 
@@ -36,17 +36,23 @@ private:
     bool isFlagged[MAX_SIZE][MAX_SIZE];
     int  adjacent [MAX_SIZE][MAX_SIZE];
 
-    // state permainannya
+    // state gamenya
     bool gameOver;
     bool gameWon;
     int  flagsPlaced;
     int  openedSafe;
     int  totalSafe;
 
-    //timer
+    // bom gerak
+    bool movingBombsOn;   // fitur aktif atau tidak
+    int  moveInterval;    // gerak setiap berapa langkah
+    int  stepCount;       // langkah yang sudah dilakukan
+    bool bombJustMoved;   // untuk notifikasi ke pemain
+
+	//
     time_t startTime;
 
-    //inisialisasi papannya
+    //papan
     void resetBoard() {
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++) {
@@ -55,11 +61,13 @@ private:
                 isFlagged[r][c] = false;
                 adjacent [r][c] = 0;
             }
-        gameOver    = false;
-        gameWon     = false;
-        flagsPlaced = 0;
-        openedSafe  = 0;
-        totalSafe   = size * size - totalBombs;
+        gameOver      = false;
+        gameWon       = false;
+        flagsPlaced   = 0;
+        openedSafe    = 0;
+        totalSafe     = size * size - totalBombs;
+        stepCount     = 0;
+        bombJustMoved = false;
     }
 
     void placeBombs() {
@@ -90,7 +98,102 @@ private:
             }
     }
 
-    //flood fill nya rekursif
+
+    /*  bom bergeraj
+      setiap bom yang belum terbuka mencoba bergeser 1 kotak
+      ke arah acak (8 arah). kotak tujuan harus:
+        - dalam batas papan
+        - belum dibuka user
+        - bukan bom lain (tidak boleh tumpuk)
+      lalu jika bom berhasil pindah ke kotak bertanda F:
+        - Flag terlepas otomatis (fair warning)
+      jika bom pindah ke kotak yang sedang terbuka:
+        - game over (bom meledak di bawah kaki user) */
+
+    void moveBombs() {
+        // kumpulkan semua posisi bom saat ini
+        int bombR[MAX_SIZE * MAX_SIZE];
+        int bombC[MAX_SIZE * MAX_SIZE];
+        int bombCount = 0;
+        for (int r = 0; r < size; r++)
+            for (int c = 0; c < size; c++)
+                if (hasBomb[r][c]) {
+                    bombR[bombCount] = r;
+                    bombC[bombCount] = c;
+                    bombCount++;
+                }
+
+        // acak urutan gerak bom agar tidak saling menghalangi secara berurutan
+        for (int i = bombCount - 1; i > 0; i--) {
+            int j = rand() % (i + 1);
+            int tr = bombR[i]; bombR[i] = bombR[j]; bombR[j] = tr;
+            int tc = bombC[i]; bombC[i] = bombC[j]; bombC[j] = tc;
+        }
+
+        int dr[] = {-1,-1,-1, 0, 0, 1, 1, 1};
+        int dc[] = {-1, 0, 1,-1, 1,-1, 0, 1};
+
+        bombJustMoved = false;
+
+        for (int i = 0; i < bombCount; i++) {
+            int r = bombR[i];
+            int c = bombC[i];
+
+            //bom sudah tidak ada di sini (dipindahkan iterasi sebelumnya)
+            if (!hasBomb[r][c]) continue;
+
+            //acak 8 arah, coba satu per satu sampai ketemu yang valid
+            // buat permutasi acak dari 8 arah
+            int order[8] = {0,1,2,3,4,5,6,7};
+            for (int k = 7; k > 0; k--) {
+                int j = rand() % (k + 1);
+                int tmp = order[k]; order[k] = order[j]; order[j] = tmp;
+            }
+
+            bool moved = false;
+            for (int k = 0; k < 8 && !moved; k++) {
+                int d  = order[k];
+                int nr = r + dr[d];
+                int nc = c + dc[d];
+
+                //cek batas
+                if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
+                //tidak boleh ke kotak bom lain
+                if (hasBomb[nr][nc]) continue;
+
+                // kotak tujuan valid maka pindahkan bom
+                hasBomb[r][c]   = false;
+                hasBomb[nr][nc] = true;
+                bombJustMoved   = true;
+
+                //jika tujuan punya flag, flag terlepas
+                if (isFlagged[nr][nc]) {
+                    isFlagged[nr][nc] = false;
+                    flagsPlaced--;
+                }
+
+                // jika tujuan sudah terbuka maka meledak dan game over
+                if (isOpen[nr][nc]) {
+                    gameOver = true;
+                }
+
+                moved = true;
+            }
+            // jika semua 8 arah terblokir, bom diam di tempat
+        }
+
+        //hitung ulang semua angka tetangga setelah bom bergerak
+        if (bombJustMoved) {
+            calcAdjacent();
+
+            /* Perbaiki kotak yang sudah terbuka:
+			jika angkanya berubah menjadi 0 setelah bom pergi,
+            tidak otomatis flood fill (biarkan pemain lihat perubahan).
+            ini desain sengaja biar gak confusing. */
+        }
+    }
+
+    //flood fill rekursif
     void floodFill(int r, int c) {
         if (r < 0 || r >= size || c < 0 || c >= size) return;
         if (isOpen[r][c] || isFlagged[r][c])           return;
@@ -107,7 +210,7 @@ private:
         }
     }
 
-    //cek kl menang
+    //cek menang 
     bool checkWin() {
         if (flagsPlaced != totalBombs) return false;
         for (int r = 0; r < size; r++)
@@ -116,16 +219,28 @@ private:
         return true;
     }
 
-    //board nya
+    //bentuk papan
     void printBoard(bool reveal = false) {
         time_t now     = time(NULL);
         int    elapsed = (int)difftime(now, startTime);
 
         std::cout << "\n";
-        std::cout << "  Bom tersisa : " << (totalBombs - flagsPlaced)
-                  << "   |   Waktu : " << elapsed << " detik\n\n";
 
-        //nomor kolom
+        //notifikasi bom bergerak
+        if (bombJustMoved && !reveal) {
+            std::cout << "  !! BOM BERGERAK !! Angka di papan sudah diperbarui.\n";
+        }
+
+        // info baris
+        std::cout << "  Bom tersisa : " << (totalBombs - flagsPlaced)
+                  << "   |   Waktu : " << elapsed << " detik";
+        if (movingBombsOn) {
+            int langkahBerikut = moveInterval - (stepCount % moveInterval);
+            std::cout << "   |   Bom gerak dalam : " << langkahBerikut << " langkah";
+        }
+        std::cout << "\n\n";
+
+        // nomor kolom
         std::cout << "     ";
         for (int c = 1; c <= size; c++) {
             if (c < 10) std::cout << " " << c << " ";
@@ -147,6 +262,7 @@ private:
                 if (reveal && hasBomb[r][c]) {
                     ch = (isOpen[r][c]) ? SYM_EXPLODE : SYM_BOMB;
                 } else if (isOpen[r][c]) {
+                    // tmpilkan angka terbaru (bisa berubah setelah bom gerak)
                     ch = (adjacent[r][c] == 0) ? ' ' : ('0' + adjacent[r][c]);
                 } else if (isFlagged[r][c]) {
                     ch = SYM_FLAG;
@@ -158,7 +274,7 @@ private:
             std::cout << "|\n";
         }
 
-        //garis bawah
+        // garis bawah
         std::cout << "    +";
         for (int c = 0; c < size; c++) std::cout << "---";
         std::cout << "+\n";
@@ -185,16 +301,32 @@ private:
     }
 
 public:
-    //game baru
+    //game baru setup
     void setup() {
-        std::cout << "\n==============================\n";
-        std::cout <<   "|       MINESWEEPER++        |\n";
-        std::cout << "\n==============================\n\n";
+        std::cout << "\n+============================+\n";
+        std::cout <<   "|        MINESWEEPER++       |\n";
+        std::cout <<   "|      [ Bom Bergerak! ]     |\n";
+        std::cout <<   "+============================+\n\n";
 
         size = readInt("  Ukuran papan (4-10) : ", 4, MAX_SIZE);
         int maxBombs = size * size - 1;
         totalBombs   = readInt("  Jumlah bom (1-" + intToStr(maxBombs) + ") : ",
                                1, maxBombs);
+
+        // option buat idupin moving bomb
+        std::cout << "\n  Aktifkan Moving Bombs? (1=Ya / 2=Tidak) : ";
+        int pil = readInt("", 1, 2);
+        movingBombsOn = (pil == 1);
+
+        if (movingBombsOn) {
+            moveInterval = readInt("  Bom gerak setiap berapa langkah? (1-10) : ",
+                                   1, 10);
+            std::cout << "  [OK] Bom akan bergerak setiap "
+                      << moveInterval << " langkah!\n";
+        } else {
+            moveInterval = 0;
+            std::cout << "  [OK] Mode klasik (bom tidak bergerak).\n";
+        }
 
         srand((unsigned int)time(NULL));
         resetBoard();
@@ -204,7 +336,7 @@ public:
         startTime = time(NULL);
     }
 
-    //loop 1 game
+    // loop satu ronde
     void play() {
         while (!gameOver && !gameWon) {
             printBoard();
@@ -215,61 +347,76 @@ public:
             int r = readInt("  Baris (1-" + intToStr(size) + ") : ", 1, size) - 1;
             int c = readInt("  Kolom (1-" + intToStr(size) + ") : ", 1, size) - 1;
 
+            bool validMove = false;
+
             if (aksi == 1) {
-                // -- Buka kotak --------------------------------
+                // buat buka kotak
                 if (isOpen[r][c]) {
                     std::cout << "  [!] Kotak sudah terbuka.\n";
-                    continue;
-                }
-                if (isFlagged[r][c]) {
+                } else if (isFlagged[r][c]) {
                     std::cout << "  [!] Kotak bertanda. Hapus tanda dulu.\n";
-                    continue;
-                }
-                if (hasBomb[r][c]) {
-                    isOpen[r][c] = true;
-                    gameOver = true;
                 } else {
-                    floodFill(r, c);
-                    if (checkWin()) gameWon = true;
+                    validMove = true;
+                    if (hasBomb[r][c]) {
+                        isOpen[r][c] = true;
+                        gameOver = true;
+                    } else {
+                        floodFill(r, c);
+                        if (checkWin()) gameWon = true;
+                    }
                 }
             } else {
-                // -- Tandai / hapus tanda ----------------------
+                // ngasih tanda atau apus tanda
                 if (isOpen[r][c]) {
                     std::cout << "  [!] Kotak sudah terbuka, tidak bisa ditandai.\n";
-                    continue;
-                }
-                if (isFlagged[r][c]) {
-                    isFlagged[r][c] = false;
-                    flagsPlaced--;
-                    std::cout << "  Tanda dihapus.\n";
                 } else {
-                    isFlagged[r][c] = true;
-                    flagsPlaced++;
-                    std::cout << "  Kotak ditandai.\n";
-                    if (checkWin()) gameWon = true;
+                    validMove = true;
+                    if (isFlagged[r][c]) {
+                        isFlagged[r][c] = false;
+                        flagsPlaced--;
+                        std::cout << "  Tanda dihapus.\n";
+                    } else {
+                        isFlagged[r][c] = true;
+                        flagsPlaced++;
+                        std::cout << "  Kotak ditandai.\n";
+                        if (checkWin()) gameWon = true;
+                    }
+                }
+            }
+
+            // trigger vbom gerak
+            if (validMove && movingBombsOn && !gameOver && !gameWon) {
+                stepCount++;
+                if (stepCount % moveInterval == 0) {
+                    moveBombs();
+                    // Cek game over akibat bom meledak saat bergerak
+                    // (sudah di-set di dalam moveBombs)
                 }
             }
         }
 
-        // hasl akhir
+        // hasil akhirnya
         time_t endTime = time(NULL);
         int elapsed    = (int)difftime(endTime, startTime);
 
         if (gameOver) {
+            bombJustMoved = false;  //jangan tampilkan notif gerak saat game over
             printBoard(true);
             std::cout << "\n  *** BOOM! Game Over! ***\n";
             std::cout << "  Kamu menginjak bom - semua bom terungkap.\n";
-            std::cout << "  Waktu bermain : " << elapsed << " detik.\n\n";
+            std::cout << "  Total langkah  : " << stepCount << "\n";
+            std::cout << "  Waktu bermain  : " << elapsed << " detik.\n\n";
         } else {
             printBoard();
             std::cout << "\n  *** SELAMAT! Kamu Menang! ***\n";
             std::cout << "  Semua bom berhasil ditandai dengan tepat!\n";
-            std::cout << "  Waktu bermain : " << elapsed << " detik.\n\n";
+            std::cout << "  Total langkah  : " << stepCount << "\n";
+            std::cout << "  Waktu bermain  : " << elapsed << " detik.\n\n";
         }
     }
 };
 
-//ini menu utamanya
+//menu utama
 int main() {
     srand((unsigned int)time(NULL));
 
