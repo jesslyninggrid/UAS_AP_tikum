@@ -2,14 +2,17 @@ PROJECT 4 oleh Gabrielle Christin
 
 Minesweeper++
 
-Minesweeper++ Moving Bombs adalah variasi dari permainan Minesweeper klasik yang
-menambahkan elemen dinamis berupa bom yang dapat berpindah posisi secara acak setiap
-beberapa langkah. Tidak seperti Minesweeper biasa di mana posisi bom selalu tetap sejak
-awal permainan, pada mode ini setiap bom yang belum terbuka akan bergeser satu kotak ke
-arah acak setelah pemain melakukan sejumlah langkah tertentu, memaksa pemain untuk
-terus waspada karena angka-angka petunjuk di papan bisa berubah kapan saja. Jika bom
-berpindah ke kotak yang sudah terbuka, permainan langsung berakhir, dan jika bom
-berpindah ke kotak yang sedang ditandai, tanda tersebut otomatis terlepas sehingga
-pemain harus menandai ulang. Fitur ini membuat permainan jauh lebih menantang karena
-pemain tidak bisa hanya mengandalkan analisis statis, melainkan harus berpikir cepat dan
-beradaptasi dengan kondisi papan yang terus berubah.
+Program Minesweeper++ ini dibuat menggunakan satu kelas utama bernama Game yang bertugas
+mengelola seluruh logika permainan, mulai dari pembuatan papan, penempatan bom secara acak,
+perhitungan jumlah bom di sekitar setiap kotak, hingga pengecekan kondisi menang dan kalah. Saat
+permainan dimulai, pemain dapat menentukan ukuran papan (4–10) dan jumlah bom yang akan digunakan,
+kemudian program akan membuat papan permainan menggunakan array 2 dimensi statis berukuran
+maksimum 10×10 sesuai ketentuan tugas. Pemain dapat memilih aksi untuk membuka kotak atau memberi
+tanda pada kotak yang dicurigai berisi bom. Jika kotak yang dibuka mengandung bom, permainan langsung
+berakhir dan seluruh bom ditampilkan, sedangkan jika kotak tersebut memiliki nilai 0 maka program akan
+secara otomatis membuka area kosong di sekitarnya menggunakan metode rekursif (flood fill). Selama
+permainan berlangsung, program menampilkan papan secara rapi lengkap dengan jumlah bom yang belum
+ditandai dan waktu bermain yang dihitung sejak permainan dimulai. Kondisi kemenangan dicapai apabila
+seluruh bom berhasil ditandai dengan benar tanpa ada tanda pada kotak aman. Selain itu, program juga
+menyediakan menu utama yang memungkinkan pemain memulai permainan baru atau keluar dari aplikasi
+setelah satu ronde permainan selesai.
