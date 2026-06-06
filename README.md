@@ -9,7 +9,7 @@ List Anggota Kelompok Tikum:
 Pembagian Pengerjaan Project: 
 1. Project 1 dikerjakan oleh Moza Apriza Parinduri (251401020)
 2. Project 2 dikerjakan oleh Jesslyn Inggrid (251401029)
-3. Project 3 dikerjakan oleh
+3. Project 3 dikerjakan oleh Salsabila Sujarwo (251401086)
 4. Project 4 dikerjakan oleh Gabrielle Christin (251401047)
 5. Project 5 dikerjakan oleh
 
