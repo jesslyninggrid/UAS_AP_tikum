@@ -15,4 +15,4 @@ Pembagian Pengerjaan Project:
 
 Link Google Drive (berisi screenshot hasil program) : https://drive.google.com/drive/folders/1SzISfsuAURDWwa3XaozNr7j66FRyRgKd?usp=sharing
 
-Link Video Presentasi Youtube: 
+Link Video Presentasi Youtube: https://youtu.be/GKCxK7oul5o
