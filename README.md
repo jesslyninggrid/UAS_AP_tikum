@@ -7,7 +7,7 @@ List Anggota Kelompok Tikum:
 4. Salsabila Sujarwo (251401086)
 
 Pembagian Pengerjaan Project: 
-1. Project 1 dikerjakan oleh
+1. Project 1 dikerjakan oleh Moza Apriza Parinduri (251401020)
 2. Project 2 dikerjakan oleh Jesslyn Inggrid (251401029)
 3. Project 3 dikerjakan oleh
 4. Project 4 dikerjakan oleh Gabrielle Christin (251401047)
