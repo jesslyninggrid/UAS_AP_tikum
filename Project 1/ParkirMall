@@ -1,0 +1,191 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <ctime>
+#include <cmath>
+#include <iomanip>
+
+using namespace std;
+
+struct Petugas {
+    string nama;
+    string id;
+};
+
+struct Kendaraan {
+    string plat;
+    string merk;
+    string warna;
+    time_t waktuMasuk; 
+};
+
+const int kapasitas_max = 20; 
+const int tarif = 2; 
+
+void hitungDurasi(time_t waktuMasuk, int &jam, int &menit, int &detik, long &totalDetik) {
+    time_t waktuSekarang = time(0);
+    totalDetik = difftime(waktuSekarang, waktuMasuk);
+    
+    long sisa = totalDetik;
+    jam = sisa / 3600;
+    sisa %= 3600;
+    menit = sisa / 60;
+    detik = sisa % 60;
+}
+
+void tambahKendaraan(vector<Kendaraan>* daftarParkir) {
+    int jumlah;
+    cout << "Masukkan jumlah mobil yang akan di parkirkan : ";
+    cin >> jumlah;
+    cin.ignore();
+
+    if (daftarParkir->size() + jumlah > kapasitas_max) {
+        cout << "Maaf, parkiran hanya dapat memuat 20 mobil !\n\n";
+        return;
+    }
+
+    for (int i = 0; i < jumlah; i++) {
+        Kendaraan k;
+        cout << "Mobil ke " << daftarParkir->size() + 1 << endl; 
+        cout << "Masukkan plat mobil  : "; 
+        getline(cin, k.plat);
+        cout << "Masukkan merk mobil  : ";
+        getline(cin, k.merk);
+        cout << "Masukkan warna mobil : ";
+        getline(cin, k.warna);
+        
+        k.waktuMasuk = time(0); 
+        daftarParkir->push_back(k);
+        cout << endl;
+    }
+}
+
+void tampilkanDaftar(const vector<Kendaraan>* daftarParkir) {
+    if (daftarParkir->empty()) {
+        cout << "Tidak ada mobil yang sedang terparkir\n\n";
+        return;
+    }
+
+    cout << "DAFTAR MOBIL YANG SUDAH TERPARKIR : "<<endl;
+    cout << "=========================================================================\n";
+    for (size_t i = 0; i < daftarParkir->size(); i++) {
+        int j, m, d;
+        long totalDetik;
+        hitungDurasi((*daftarParkir)[i].waktuMasuk, j, m, d, totalDetik);
+
+        cout << "Mobil ke-" << i + 1 << endl;
+        cout << "Plat mobil   : " << (*daftarParkir)[i].plat << endl;
+        cout << "Merk mobil   : " << (*daftarParkir)[i].merk << endl;
+        cout << "Warna mobil  : " << (*daftarParkir)[i].warna << endl;
+        cout << "Waktu parkir : " << j << " jam " << m << " menit " << d << " detik\n";
+        cout << "=========================================================================\n";
+    }
+}
+
+void prosesPembayaran(vector<Kendaraan>* daftarParkir) {
+    if (daftarParkir->empty()) {
+        cout << "Tidak ada mobil yang sedang terparkir" << endl;
+        return;
+    }
+
+    tampilkanDaftar(daftarParkir);
+
+    string cariPlat;
+    cout << "Masukkan plat mobil yang ingin dibayar : ";
+    getline(cin, cariPlat);
+
+    int indeksDitemukan = -1;
+    for (size_t i = 0; i < daftarParkir->size(); i++) {
+        if ((*daftarParkir)[i].plat == cariPlat) {
+            indeksDitemukan = i;
+            break;
+        }
+    }
+
+    if (indeksDitemukan == -1) {
+        cout << "PLAT TIDAK DITEMUKAN !\n\n";
+        cout << "Masukkan plat mobil yang ingin dibayar : ";
+        getline(cin, cariPlat);
+        
+        for (size_t i = 0; i < daftarParkir->size(); i++) {
+            if ((*daftarParkir)[i].plat == cariPlat) {
+                indeksDitemukan = i;
+                break;
+            }
+        }
+    }
+
+    if (indeksDitemukan != -1) {
+        int j, m, d;
+        long totalDetik;
+        hitungDurasi((*daftarParkir)[indeksDitemukan].waktuMasuk, j, m, d, totalDetik);
+ 
+        if (totalDetik == 0) totalDetik = 1; 
+        long biaya = totalDetik * tarif;
+
+        cout << "\nB I A Y A   P A R K I R : Rp" << biaya << endl;
+        cout << "=========================================================================\n";
+
+        daftarParkir->erase(daftarParkir->begin() + indeksDitemukan);
+    } else {
+        cout << "Plat tetap tidak ditemukan. Kembali ke menu utama.\n";
+    }
+}
+
+int main() {
+    Petugas petugas;
+    vector<Kendaraan> daftarParkir;
+    int opsi = 0;
+
+    cout << "=========================================================================\n";
+    cout << "---------------------- S E L A M A T   D A T A N G ----------------------\n";
+    cout << "                      DI PORTAL PARKIR KHUSUS MOBIL                      \n";
+    cout << "                               MALL PRIENAL                              \n";
+    cout << "=========================================================================\n\n";
+    cout << "Kami senang Anda telah hadir.\n";
+    cout << "Sebelum melanjutkan, silahkan masukkan informasi Anda yang akan bertugas hari ini.\n\n";
+    
+    cout << "Masukkan nama : ";
+    getline(cin, petugas.nama);
+    cout << "Masukkan ID   : ";
+    getline(cin, petugas.id);
+    cout << endl;
+
+    while (opsi != 4) {
+        cout << "=========================================================================\n";
+        cout << "Nama Petugas : " << petugas.nama << endl;
+        cout << "ID Petugas   : " << petugas.id << endl << endl;
+        cout << "                      TERIMA KASIH ATAS KERJASAMANYA !\n";
+        cout << "---------------------- S E L A M A T   B E R T U G A S ------------------\n";
+        cout << "=========================================================================\n\n";
+        
+        cout << "Silahkan input opsi berikut dalam bentuk angka.\n";
+        cout << "1. Tambahkan Daftar Kendaraan\n";
+        cout << "2. Tampilkan Daftar Kendaraan\n";
+        cout << "3. Pembayaran\n";
+        cout << "4. Keluar Program\n";
+        cout << "Masukkan opsi : ";
+        cin >> opsi;
+        cin.ignore(); 
+        cout << endl;
+
+        switch (opsi) {
+            case 1:
+                tambahKendaraan(&daftarParkir); 
+                break;
+            case 2:
+                tampilkanDaftar(&daftarParkir); 
+                break;
+            case 3:
+                prosesPembayaran(&daftarParkir); 
+                break;
+            case 4:
+                cout << "Program selesai. Sampai jumpa dan selamat beristirahat!\n";
+                break;
+            default:
+                cout << "Opsi tidak valid! Silahkan pilih 1-4.\n\n";
+        }
+    }
+
+    return 0;
+}
